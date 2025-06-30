@@ -18,36 +18,46 @@
 
 
 
-# from graph_notice_extraction import NOTICE_EXTRACTION_GRAPH
-
-# image_data = NOTICE_EXTRACTION_GRAPH.get_graph().draw_mermaid_png()
-
-# # Save the workflow visualization to a PNG file:
-# with open("notice_extraction_graph.png", "wb") as f:
-#     f.write(image_data)
-
-
-
 from graph_notice_extraction import NOTICE_EXTRACTION_GRAPH
+image_data = NOTICE_EXTRACTION_GRAPH.get_graph().draw_mermaid_png()
+# Save the workflow visualization to a PNG file:
+with open("notice_extraction_conditional_graph.png", "wb") as f:
+    f.write(image_data)
+
 from example_emails import EMAILS
 import json
 import re
 # Initialization:
-initial_state = {
+initial_state_no_escalation = {
     "notice_message": EMAILS[0],
     "notice_email_extract": None,
     "escalation_text_criteria": "Существует риск пожара или протечек.",
-    "escalation_money_criteria": 100_000,
+    "escalation_money_criteria": 10_000_000,
     "needs_escalation": False,
     "escalation_emails": ["brog@abc.ru", "bigceo@company.ru"],
 }
+
+initial_state_escalation = {
+    "notice_message": EMAILS[0],
+    "notice_email_extract": None,
+    "escalation_text_criteria": "Работники нарушают правила безопасности.",
+    "escalation_money_criteria": 10_000_000,
+    "needs_escalation": False,
+    "escalation_emails": ["brog@abc.ru", "bigceo@company.ru"],
+}
+
 # Result:
-final_state = NOTICE_EXTRACTION_GRAPH.invoke(initial_state)
-# Prints:
-match = re.search(r"```json\n(.*?)\n```", final_state["notice_email_extract"].content, re.DOTALL)
-json_str = match.group(1)
-parsed = json.loads(json_str)
-print(f"notice_email_extract: {json.dumps(parsed, indent=2, ensure_ascii=False)}\n")
-print(f"Need of escalation: {final_state["needs_escalation"]}\n")
-print(f"Response metadata: {json.dumps(final_state["notice_email_extract"].response_metadata, indent=2, ensure_ascii=False)}\n")
+no_esc_result = NOTICE_EXTRACTION_GRAPH.invoke(initial_state_no_escalation)
+print(f"Need of escalation: {no_esc_result["needs_escalation"]}\n")
+
+no_esc_result = NOTICE_EXTRACTION_GRAPH.invoke(initial_state_escalation)
+print(f"Need of escalation: {no_esc_result["needs_escalation"]}\n")
+
+# # Prints:
+# match = re.search(r"```json\n(.*?)\n```", final_state["notice_email_extract"].content, re.DOTALL)
+# json_str = match.group(1)
+# parsed = json.loads(json_str)
+# print(f"notice_email_extract: {json.dumps(parsed, indent=2, ensure_ascii=False)}\n")
+
+# print(f"Response metadata: {json.dumps(final_state["notice_email_extract"].response_metadata, indent=2, ensure_ascii=False)}\n")
 
